@@ -1,7 +1,7 @@
 const express = require("express");
 const app = express();
 const cors = require("cors");
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const dotenv = require("dotenv").config();
 const port = process.env.PORT || 5000;
 
@@ -27,9 +27,28 @@ async function run() {
   try {
     const productsCollection = client.db("Ecommerce").collection("products");
 
-    app.get('/products', async (req, res) => {
-      const query = {}
+    app.get("/products", async (req, res) => {
+      const query = {};
       const result = await productsCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    // GET A SINGLE PRODUCT DATA //
+
+    app.get("/products/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await productsCollection.findOne(query);
+      res.send(result);
+    });
+    // UPDATE A SINGLE PRODUCT QUANTITY //
+    app.patch("/products/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updatedDoc = {
+        $inc: {quantity: + 1 },
+      };
+      const result = await productsCollection.updateOne(filter, updatedDoc);
       res.send(result);
     });
 
