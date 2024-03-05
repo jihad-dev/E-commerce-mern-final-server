@@ -26,6 +26,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     const productsCollection = client.db("Ecommerce").collection("products");
+    const cartsCollection = client.db("Ecommerce").collection("carts");
 
     app.get("/products", async (req, res) => {
       const query = {};
@@ -46,9 +47,23 @@ async function run() {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
       const updatedDoc = {
-        $inc: {quantity: + 1 },
+        $inc: { quantity: +1 },
       };
       const result = await productsCollection.updateOne(filter, updatedDoc);
+      res.send(result);
+    });
+
+    // POST CART ITEM INFO TO THE DATABASE //
+    app.post("/products", async (req, res) => {
+      const product = req.body;
+      const result = await cartsCollection.insertOne(product);
+      res.send(result);
+    });
+
+    // GET ALL PRODUCT CARTS DATA //
+
+    app.get("/carts", async (req, res) => {
+      const result = await cartsCollection.find().toArray();
       res.send(result);
     });
 
